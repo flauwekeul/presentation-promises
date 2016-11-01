@@ -104,7 +104,7 @@ getData(function(a) {
                             </div>
                             <div class="col fragment">
                                 <h3>Promises</h3>
-                                <p>encourage <strong>chaining</strong></p>
+                                <p>encourage <strong>modularity</strong> <small>(through chaining)</small></p>
                                 <pre><code data-trim data-noescape>
 getData()
     .then(function(a) {
@@ -202,7 +202,7 @@ console.log(somePromise)
                         </code></pre>
                     </section>
                     <section>
-                        <h2>Promise methods <strong>always</strong> return a new promise</h2>
+                        <h3>Promise methods <strong>always</strong> return a new promise</h3>
                         <pre><code data-trim>
 var thenResult = gimmeAPromise().then()
 var catchResult = gimmeAPromise().catch()
@@ -217,8 +217,8 @@ console.log(finallyResult)
                         </code></pre>
                     </section>
                     <section>
-                        <h2>That's why promises can be "chained"</h2>
-                        <p>The interface stays the same:</p>
+                        <h3>That's why promises can be "chained"</h3>
+                        <p>Because the interface stays the same:</p>
                         <pre><code data-trim>
 gimmeAPromise()
     .then()
@@ -241,36 +241,57 @@ gimmeAPromise()
         <span class="fragment">// 42</span>
     })
                         </code></pre>
+                        <p class="fragment"><code>console.log</code> isn't called before the promise that <code>gimmeAnotherPromise()</code> returns resolves!</p>
                     </section>
                     <section>
                         <h3>So there's no need to nest promises</h3>
                         <p>Don't do this:</p>
-                        <pre><code data-trim data-noescape>
+                        <pre><code data-trim>
 gimmeAPromise()
     .then(function() {
-        <span class="fragment">gimmeAnotherPromise().then(function() {
-            <span class="fragment">andAnotherPromise().then(function() {
-                <span class="fragment">😞</span>
-            })</span>
-        })</span>
+        gimmeAnotherPromise().then(function() {
+            andAnotherPromise().then(function() {
+                ...
+            })
+        })
     })
                         </code></pre>
-                        <p>Remember callback hell?</p>
+                        <p class="fragment">Remember callback hell? 😞</p>
                     </section>
                     <section>
                         <p>Instead do this:</p>
-                        <pre><code data-trim data-noescape>
+                        <pre><code data-trim>
 gimmeAPromise()
-    <span class="fragment">.then(function() {
+    .then(function() {
         return gimmeAnotherPromise()
-    })</span>
-    <span class="fragment">.then(function() {
+    })
+    .then(function() {
         return andAnotherPromise()
-    })</span>
-    <span class="fragment">.then(function() {
-        😃
-    })</span>
+    })
+    .then(function() {
+        ...
+    })
                         </code></pre>
+                        <p class="fragment">Modularity! 😃</p>
+                    </section>
+                    <section>
+                        <p>Because it leads to:</p>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(timesTwo)
+    .then(plusFive)
+    .finally(cleanUp)
+
+gimmeAnotherPromise()
+    .then(plusFive)
+    .then(cleanUp)
+    .then(timesTwo)
+
+function timesTwo(value) { return value * 2 }
+function plusFive(value) { return value + 5 }
+function cleanup() { return 🗑 }
+                        </code></pre>
+                        <p class="fragment">Composition! 😍</p>
                     </section>
                 </section>
 
@@ -312,7 +333,7 @@ function gimmeAPromise() {
                         </code></pre>
                     </section>
                     <section>
-                        <h2>Converting <strong>any</strong> value to a promise</h2>
+                        <h3>Converting <strong>any</strong> value to a promise</h3>
                         <p><code>Promise.resolve</code></p>
                         <pre><code data-trim>
 var result = Promise.resolve(42)
@@ -383,6 +404,71 @@ gimmeAPromise()
                         <pre><code data-trim>
 gimmeAPromise()
     .finally(function() { ... })
+                        </code></pre>
+                        <p class="fragment">Not in native <code>Promise</code>!</p>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Rejecting promises</h2>
+                    </section>
+                    <section>
+                        <div class="cols">
+                            <div class="col">
+                                <p>Using <code>reject()</code></p>
+                                <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        return $q.reject('too bad')
+        // or Promise.reject()
+    })
+    .then(function() {
+        // never called
+    })
+    .catch(function(message) {
+        console.log(message)
+        // 'too bad'
+    })
+                                </code></pre>
+                            </div>
+                            <div class="fragment col">
+                                <p>Using <code>throw</code></p>
+                                <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        throw new Error('too bad')
+    })
+    .then(function() {
+        // never called
+    })
+    .catch(function(message) {
+        console.log(message)
+        // 'too bad'
+    })
+                                </code></pre>
+                                <p class="fragment"><small><code>then</code> turns exceptions into rejected promises</small></p>
+                            </div>
+                        </div>
+                        <p class="fragment">The first rejection handler is called.</p>
+                    </section>
+                    <section>
+                        <h3>Rejection handlers return a <em>resolved</em> promise by default</h3>
+                        <pre><code data-trim data-noescape>
+gimmeAPromise()
+    .then(function() {
+        throw new Error('too bad')
+    })
+    .catch(function(message) {
+        return message
+    })
+    .then(function(value) {
+        console.log(value)
+        <span class="fragment" data-fragment-index="1">// 'too bad'</span>
+    }, function(message) {
+        console.log(message)
+        <span class="fragment" data-fragment-index="1">// doesn't get called!</span>
+    })
                         </code></pre>
                     </section>
                 </section>
@@ -466,28 +552,72 @@ element(by.id('button')).click()
                 </section>
 
                 <section>
-                    <h2 class="case-sensitive">$resource</h2>
+                    <section>
+                        <h2 class="case-sensitive"><code>Promise.all</code> / <code>$q.all</code></h2>
+                        <blockquote>
+                            "Combines multiple promises into a single promise that is resolved when all of the input promises are resolved."
+                            <cite><a href="https://code.angularjs.org/1.4.14/docs/api/ng/service/$q#all">Angular docs</a></cite>
+                        </blockquote>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$q.all([
+    gimmeAPromise(),
+    gimmeAnotherPromise()
+])
+    .then(function(results) {
+        console.log(results[0])
+        // { then: function, catch: function, finally: function, ... },
+        console.log(results[1])
+        // { then: function, catch: function, finally: function, ... }
+    })
+                        </code></pre>
+                        <p class="fragment"><code>$q.all</code> also accepts an object:</p>
+                        <pre class="fragment"><code data-trim>
+$q.all({
+    aPromise: gimmeAPromise(),
+    anotherPromise: gimmeAnotherPromise()
+})
+    .then(function(results) {
+        console.log(results.aPromise)
+        // aPromise: { then: function, catch: function, finally: function, ... },
+        console.log(results.anotherPromise)
+        // anotherPromise: { then: function, catch: function, finally: function, ... },
+    })
+                        </code></pre>
+                    </section>
                 </section>
 
                 <section>
-                    <h2>Shortcomings</h2>
+                    <section>
+                        <h2>In summary</h2>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/rZbYZ_NDoE8?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                        <!-- <img src="img/no-and-then.gif"> -->
+                    </section>
+                    <section>
+                        <ol>
+                            <li>Callbacks encourage 💩 code</li>
+                            <li class="fragment">Promises encourage modularity (over nesting)</li>
+                            <li class="fragment">Promises encourage composition</li>
+                            <li class="fragment">Promises use a contract</li>
+                            <li class="fragment">Promises are safe (everything's a promise)</li>
+                            </li>
+                        </ol>
+                    </section>
                 </section>
 
                 <section>
-                    <section>
-                        <h2>The Future</h2>
-                    </section>
-                    <section>
-                        <h2>Generators</h2>
-                    </section>
-                    <section>
-                        <h2>Async / await</h2>
-                    </section>
-                    <section>
-                        <h2>Observables</h2>
-                    </section>
+                    <h2>Further reading</h2>
+                    <ul>
+                        <li><a href="https://code.angularjs.org/1.4.14/docs/api/ng/service/$q#all">Angular $q documentation</a></li>
+                        <li><a href="http://jamesknelson.com/grokking-es6-promises-the-four-functions-you-need-to-avoid-callback-hell/">Introduction to ES6 Promises – The Four Functions You Need To Avoid Callback Hell</a> - James K. Nelson</li>
+                        <li><a href="http://shop.oreilly.com/product/0636920033752.do">You Don't Know JS: Async and Performance</a> - <a href="http://getify.me">Kyle Simpson</a></li>
+                    </ul>
                 </section>
 
+                <section>
+                    <h1>Thanks!</h1>
+                </section>
             </div>
         </div>
 
