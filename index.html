@@ -1,0 +1,513 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Promises</title>
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/black.css">
+        <link rel="stylesheet" href="css/custom.css">
+
+        <!-- Theme used for syntax highlighting of code -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+
+                <section>
+                    <h1>Promises</h1>
+                    <figure>
+                        <img src="img/logo.svg" id="logo-abbe">
+                        <figcaption>
+                            Abbe Keultjes<br>
+                            Frontmen
+                        </figcaption>
+                    </figure>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Callbacks</h2>
+                        <ul>
+                            <li class="fragment">just a function</li>
+                            <li class="fragment">passed as an argument</li>
+                            <li class="fragment">which gets called (back) later</li>
+                        </ul>
+                        <pre class="fragment"><code data-trim>
+function acceptACallback(callback) {
+    // do stuff
+    callback()
+}
+
+acceptACallback(function() {
+    console.log('callback called (back)')
+})
+// 'callback called (back)'
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2>Callback Hell</h2>
+                        <pre><code data-trim>
+getData(function(a) {
+    getMoreData(a, function(b) {
+        getMoreData(b, function(c) {
+            getMoreData(c, function(d) {
+                getMoreData(d, function(e) {
+                    getMoreData(e, function(f) {
+                        😩
+                    })
+                })
+            })
+        })
+    })
+})
+                        </code></pre>
+                        <p class="fragment">A.k.a.: <em>pyramid of doom</em></p>
+                        <p class="fragment"><a href="http://callbackhell.com/">callbackhell.com</a></p>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Callbacks or promises?</h2>
+                        <p class="fragment">Promises <strong>don't replace</strong> callbacks</p>
+                        <p class="fragment">Promises <strong>use</strong> callbacks 😎</p>
+                    </section>
+                    <section>
+                        <div class="cols">
+                            <div class="col">
+                                <h3>Callbacks</h3>
+                                <p>encourage <strong>nesting</strong> <small>(callback hell)</small></p>
+                                <pre class="fragment"><code data-trim>
+getData(function(a) {
+    getMoreData(a, function(b) {
+        getMoreData(b, function(c) {
+            getMoreData(c, function(d) {
+                ...
+            })
+        })
+    })
+})
+                                </code></pre>
+                            </div>
+                            <div class="col fragment">
+                                <h3>Promises</h3>
+                                <p>encourage <strong>chaining</strong></p>
+                                <pre><code data-trim data-noescape>
+getData()
+    .then(function(a) {
+        return getMoreData(a)
+    })
+    .then(function(b) {
+        return getMoreData(b)
+    })
+    .then(function(c) {
+        return getMoreData(c)
+    })
+    ...
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <div class="cols">
+                            <div class="col">
+                                <h3>Callbacks</h3>
+                                <p>can be called <strong>multiple times</strong></p>
+                                <pre><code data-trim>
+function acceptACallback(callback) {
+    // do stuff
+    callback()
+    // do different stuff
+    callback()
+    // stuff...
+    callback()
+}
+
+acceptACallback(function() {
+    console.log('callback called (back)')
+})
+// 'callback called (back)'
+// 'callback called (back)'
+// 'callback called (back)'
+                                </code></pre>
+                            </div>
+                            <div class="col fragment">
+                                <h3>Promises</h3>
+                                <p>always <strong>resolve once</strong></p>
+                                <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        // runs *exactly* once
+        // (if promise fulfills)
+    })
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+                    <section>
+                        <div class="cols">
+                            <div class="col">
+                                <h3>Callbacks</h3>
+                                <p>have a <strong>convention</strong> for errors, e.g. in node:</p>
+                                <pre><code data-trim>
+fs.readFile('/foo.txt', function(err, data) {
+    if (err) {
+        console.log('Error!')
+        return
+    }
+
+    console.log(data)
+})                                </code></pre>
+                            </div>
+                            <div class="col fragment">
+                                <h3>Promises</h3>
+                                <p>have a <strong>contract</strong> for errors</p>
+                                <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        // success
+    }, function() {
+        // failure
+    })
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>What is a promise? 🤔</h2>
+                    </section>
+                    <section>
+                        <h2>An object</h2>
+                        <p>With <strong>always</strong> the same methods:</p>
+                        <pre><code data-trim>
+var somePromise = gimmeAPromise()
+console.log(somePromise)
+// { then: function, catch: function, finally: function, ... }
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2>Promise methods <strong>always</strong> return a new promise</h2>
+                        <pre><code data-trim>
+var thenResult = gimmeAPromise().then()
+var catchResult = gimmeAPromise().catch()
+var finallyResult = gimmeAPromise().finally()
+
+console.log(thenResult)
+// { then: function, catch: function, finally: function, ... }
+console.log(catchResult)
+// { then: function, catch: function, finally: function, ... }
+console.log(finallyResult)
+// { then: function, catch: function, finally: function, ... }
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2>That's why promises can be "chained"</h2>
+                        <p>The interface stays the same:</p>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then()
+    .then()
+    .catch()
+    .finally()
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>Even when a callback returns a promise</h3>
+                        <p>The promise is "unwrapped":</p>
+                        <pre><code data-trim data-noescape>
+gimmeAPromise()
+    .then(function() {
+        // gimmeAnotherPromise resolves to 42
+        return gimmeAnotherPromise()
+    })
+    .then(function(result) {
+        console.log(result)
+        <span class="fragment">// 42</span>
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>So there's no need to nest promises</h3>
+                        <p>Don't do this:</p>
+                        <pre><code data-trim data-noescape>
+gimmeAPromise()
+    .then(function() {
+        <span class="fragment">gimmeAnotherPromise().then(function() {
+            <span class="fragment">andAnotherPromise().then(function() {
+                <span class="fragment">😞</span>
+            })</span>
+        })</span>
+    })
+                        </code></pre>
+                        <p>Remember callback hell?</p>
+                    </section>
+                    <section>
+                        <p>Instead do this:</p>
+                        <pre><code data-trim data-noescape>
+gimmeAPromise()
+    <span class="fragment">.then(function() {
+        return gimmeAnotherPromise()
+    })</span>
+    <span class="fragment">.then(function() {
+        return andAnotherPromise()
+    })</span>
+    <span class="fragment">.then(function() {
+        😃
+    })</span>
+                        </code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Creating a promise</h2>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">Using the native <code>Promise</code> function</h3>
+                        <pre><code data-trim>
+function gimmeAPromise() {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            if (someCondition) {
+                resolve(42)
+            } else {
+                reject('nope')
+            }
+        }, 1000)
+    })
+}
+                        </code></pre>
+                        <p>Not fully <a href="http://caniuse.com/#search=promise">supported</a> 😒</p>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">Using the <code>$q</code> service:</h3>
+                        <pre><code data-trim>
+function gimmeAPromise() {
+    return $q(function(resolve, reject) {
+        setTimeout(function() {
+            if (someCondition) {
+                resolve(42)
+            } else {
+                reject('nope')
+            }
+        }, 1000)
+    })
+}
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2>Converting <strong>any</strong> value to a promise</h2>
+                        <p><code>Promise.resolve</code></p>
+                        <pre><code data-trim>
+var result = Promise.resolve(42)
+console.log(result)
+// { then: function, catch: function, finally: function, ... }
+                        </code></pre>
+                        <div class="fragment">
+                            <p><code>$q.when</code> / <code>$q.resolve</code></p>
+                            <pre><code data-trim>
+var result = $q.when(42) // or $q.resolve(42)
+console.log(result)
+// { then: function, catch: function, finally: function, ... }
+                            </code></pre>
+                        </div>
+                    </section>
+                    <section>
+                        <p>Even if the value is already a promise</p>
+                        <pre><code data-trim data-noescape>
+var somePromise = gimmeAPromise() // resolves to 42
+var result = Promise.resolve(somePromise)
+console.log(result)
+// { then: function, catch: function, finally: function, ... }
+
+<span class="fragment">result.then(function(value) {
+    console.log(value)
+    // 42
+})</span>
+                        </code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Promise methods</h2>
+                    </section>
+                    <section>
+                        <h2 class="case-sensitive"><code>then()</code></h2>
+                        <p>Accepts a resolve and/or reject callback:</p>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(
+        function onResolve(value) { ... },
+        function onReject(message) { ... }
+    )
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2 class="case-sensitive"><code>catch()</code></h2>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .catch(function onReject(message) { ... })
+                        </code></pre>
+                        <p>Shorthand for:</p>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(
+        null,
+        function onReject(message) { ... }
+    )
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h2 class="case-sensitive"><code>finally()</code></h2>
+                        <blockquote>
+                            "allows you to observe either the fulfillment or rejection of a promise, but to do so without modifying the final value"
+                            <cite><a href="https://code.angularjs.org/1.4.14/docs/api/ng/service/$q#the-promise-api">Angular docs</a></cite>
+                        </blockquote>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .finally(function() { ... })
+                        </code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>When to <code>return</code>?</h2>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        // return? 😕
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>Functions return <code>undefined</code> by default</h3>
+                        <pre><code data-trim>
+function meh() {
+    // does nothing
+}
+
+console.log(meh())
+// undefined
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>Except when:</h3>
+                        <ol>
+                            <li>
+                                they have a return statement
+                                <pre><code data-trim>
+function fortyTwo() {
+    return 42
+}
+
+console.log(fortyTwo())
+// 42
+                                </code></pre>
+                            </li>
+                            <li class="fragment">
+                                they are called with the <code>new</code> keyword
+                                <pre><code data-trim>
+function constructMe() {
+    // do nothing
+}
+
+console.log(new constructMe())
+// {}
+                                </code></pre>
+                            </li>
+                        </ol>
+                    </section>
+                    <section>
+                        <h3>So, with promises</h3>
+                        <p>If you don't return you just get <code>undefined</code>:</p>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        42
+    })
+    .then(function(result) {
+        console.log(result)
+        // undefined
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>Or maybe worse</h3>
+                        <p>timing issues:</p>
+                        <pre><code data-trim>
+// In a cucumber step file
+element(by.id('button')).click()
+    .then(function() {
+        element(by.id('input')).sendKeys('some text')
+    })
+    .then(function() {
+        // this *might* run too early 😱
+    })
+                        </code></pre>
+                    </section>
+                </section>
+
+                <section>
+                    <h2 class="case-sensitive">$resource</h2>
+                </section>
+
+                <section>
+                    <h2>Shortcomings</h2>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>The Future</h2>
+                    </section>
+                    <section>
+                        <h2>Generators</h2>
+                    </section>
+                    <section>
+                        <h2>Async / await</h2>
+                    </section>
+                    <section>
+                        <h2>Observables</h2>
+                    </section>
+                </section>
+
+            </div>
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+            // More info https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                history: true,
+                previewLinks: true,
+
+                // More info https://github.com/hakimel/reveal.js#dependencies
+                dependencies: [
+                    { src: 'plugin/markdown/marked.js' },
+                    { src: 'plugin/markdown/markdown.js' },
+                    { src: 'plugin/notes/notes.js', async: true },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+                ]
+            });
+        </script>
+    </body>
+</html>

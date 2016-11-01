@@ -1,0 +1,48 @@
+.reveal section img {
+    border: none;
+    box-shadow: none;
+    background: none;
+}
+.reveal figcaption,
+.reveal cite {
+    font-size: 85%;
+}
+.reveal cite {
+    display: inline-block;
+}
+/* http://stackoverflow.com/a/34111675/660260 */
+.fragment.current-visible.visible:not(.current-fragment) {
+    display: none;
+    height:0px;
+    line-height: 0px;
+    font-size: 0px;
+}
+
+#logo-abbe {
+    border-radius: 5px;
+    padding: 10px;
+    width: 200px;
+    height: 200px;
+    background-color: white;
+    vertical-align: middle;
+}
+
+.cols {
+    display: flex;
+    flex-flow: row wrap;
+}
+.col {
+    flex: 0 1 50%;
+}
+.col pre {
+    font-size: 0.45em;
+}
+
+.reveal h1.case-sensitive,
+.reveal h2.case-sensitive,
+.reveal h3.case-sensitive,
+.reveal h4.case-sensitive,
+.reveal h5.case-sensitive,
+.reveal h6.case-sensitive {
+    text-transform: none;
+}
