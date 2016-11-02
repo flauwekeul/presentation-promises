@@ -563,27 +563,30 @@ element(by.id('button')).click()
                     <section>
                         <pre><code data-trim>
 $q.all([
-    gimmeAPromise(),
-    gimmeAnotherPromise()
+    gimmeAPromise(), // resolves to 42
+    gimmeAnotherPromise() // resolves to 21
 ])
     .then(function(results) {
         console.log(results[0])
-        // { then: function, catch: function, finally: function, ... },
+        // 42
         console.log(results[1])
-        // { then: function, catch: function, finally: function, ... }
+        // 21
     })
                         </code></pre>
-                        <p class="fragment"><code>$q.all</code> also accepts an object:</p>
+                        <p class="fragment">Original order is maintained.</p>
+                    </section>
+                    <section>
+                        <p><code>$q.all</code> also accepts an object:</p>
                         <pre class="fragment"><code data-trim>
 $q.all({
-    aPromise: gimmeAPromise(),
-    anotherPromise: gimmeAnotherPromise()
+    aPromise: gimmeAPromise(), // resolves to 42
+    anotherPromise: gimmeAnotherPromise() // resolves to 21
 })
     .then(function(results) {
         console.log(results.aPromise)
-        // aPromise: { then: function, catch: function, finally: function, ... },
+        // 42
         console.log(results.anotherPromise)
-        // anotherPromise: { then: function, catch: function, finally: function, ... },
+        // 21
     })
                         </code></pre>
                     </section>
@@ -619,6 +622,7 @@ $q.all({
 
                 <section>
                     <h1>Thanks!</h1>
+                    <h3>Any questions? 🤓</h3>
                 </section>
             </div>
         </div>
