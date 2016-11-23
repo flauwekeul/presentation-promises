@@ -611,6 +611,66 @@ $q.all({
                 </section>
 
                 <section>
+                    <section>
+                        <h2>Quiz</h2>
+                        <img src="img/quiz.gif">
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">Why can promises be "chained"?</h3>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then()
+    .then()
+    .catch()
+    .finally()
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">What is <code>result</code>?</h3>
+                        <pre><code data-trim>
+gimmeAPromise()
+    .then(function() {
+        // gimmeAnotherPromise resolves to 42
+        return gimmeAnotherPromise()
+    })
+    .then(function(result) {
+        // ...
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">Why is it wise to always have a <code>catch</code>?</h3>
+                        <pre><code data-trim data-noescape>
+gimmeAPromise()
+    .then(function() {
+        // ...
+    })
+    .catch(function() {
+        // ...
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">What happens after a <code>catch</code>?</h3>
+                        <pre><code data-trim data-noescape>
+gimmeARejectedPromise()
+    .catch(function() {
+        // ...
+    })
+    .then(function() {
+        // when will this run?
+    })
+    .catch(function() {
+        // when will this run?
+    })
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3 class="case-sensitive">What are 2 reasons for returning from a promise callback?</h3>
+                    </section>
+                </section>
+
+                <section>
                     <h2>Further reading</h2>
                     <ul>
                         <li><a href="https://code.angularjs.org/1.4.14/docs/api/ng/service/$q#all">Angular $q documentation</a></li>
